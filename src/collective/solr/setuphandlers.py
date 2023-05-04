@@ -4,7 +4,10 @@ import logging
 
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces import INonInstallable
+from collective.solr.interfaces import ISearch
 from collective.solr.interfaces import ISolrConnectionConfig
+from collective.solr.interfaces import ISolrConnectionManager
+from collective.solr.interfaces import ISolrIndexQueueProcessor
 from collective.solr.interfaces import ISolrSchema
 from plone import api
 from plone.registry.interfaces import IRegistry
@@ -76,3 +79,37 @@ def migrateTo4(context):
             logger.info("Added new behavior to {}".format(type_id))
 
     logger.info("Migrated to version 4")
+
+
+def unregister_utility(context, iface, name=None):
+    sm = context.getSiteManager()
+    if name:
+        # for named utility
+        util = sm.queryUtility(iface, name)
+        sm.unregisterUtility(component=util, provided=iface, name=name)
+    else:
+        # for unnamed utility
+        util = sm.queryUtility(iface)
+        sm.unregisterUtility(provided=iface)
+        sm.utilities.unsubscribe((), iface)
+    if util:
+        del util
+    if iface in sm.utilities.__dict__['_provided']:
+        del sm.utilities.__dict__['_provided'][iface]
+    if iface in sm.utilities._subscribers[0]:
+        del sm.utilities._subscribers[0][iface]
+    sm.utilities._p_changed = True
+
+
+def post_uninstall(context):
+    portal = api.portal.get()
+    utils_to_unregister = (
+        (ISearch, None),
+        (ISolrIndexQueueProcessor, 'solr'),
+        (ISolrConnectionManager, None)
+    )
+    for iface, name in utils_to_unregister:
+        try:
+            unregister_utility(portal, iface, name)
+        except Exception:
+            logger.debug("Can't unregister utility: %s/%s" % (iface, name))
