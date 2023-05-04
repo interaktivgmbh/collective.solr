@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<object name="Image" meta_type="Dexterity FTI">
+
+  <property name="behaviors" purge="false">
+    <element remove="true" value="solr.fields" />
+    <element remove="true" value="collective.solr.behaviors.ISolrFields" />
+  </property>
+
+</object>
