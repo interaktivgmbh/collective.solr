@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<registry>
+  <records remove="true"
+           interface="collective.solr.interfaces.ISolrSchema"
+           prefix="collective.solr">
+  </records>
+</registry>

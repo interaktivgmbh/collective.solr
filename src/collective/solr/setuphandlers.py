@@ -1,17 +1,30 @@
 # -*- coding: utf-8 -*-
-from collective.solr.interfaces import ISolrConnectionConfig
-from collective.solr.interfaces import ISolrSchema
-from plone.registry.interfaces import IRegistry
-from Products.CMFCore.utils import getToolByName
+import logging
+
 from zope.component import getSiteManager
 from zope.component import getUtility
 from zope.component import queryUtility
+from zope.interface import implementer
 
-import logging
-
+from Products.CMFCore.utils import getToolByName
+from Products.CMFPlone.interfaces import INonInstallable
+from collective.solr.interfaces import ISolrConnectionConfig
+from collective.solr.interfaces import ISolrSchema
+from plone.registry.interfaces import IRegistry
 
 logger = logging.getLogger('collective.solr')
 PROFILE_ID = 'profile-collective.solr:default'
+
+
+@implementer(INonInstallable)
+class HiddenProfiles(object):
+
+    # noinspection PyPep8Naming,PyMethodMayBeStatic
+    def getNonInstallableProfiles(self):
+        """Hide uninstall profile from site-creation"""
+        return [
+            'collective.solr:uninstall',
+        ]
 
 
 def migrateTo2(context):

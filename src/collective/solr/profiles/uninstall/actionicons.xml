@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<action-icons>
+  <action-icon remove="true"
+               category="controlpanel"
+               action_id="SolrSettings"
+               title="Solr Settings"/>
+</action-icons>

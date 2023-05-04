@@ -1,5 +1,5 @@
 <layers>
-  <layer name="collective.solr.default" 
-         interface="collective.solr.browser.interfaces.IDefaultLayer"
-         remove="True" />
+  <layer remove="true"
+         name="collective.solr"
+         interface="collective.solr.browser.interfaces.IThemeSpecific"/>
 </layers>
