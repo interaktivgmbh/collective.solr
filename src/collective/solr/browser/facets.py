@@ -123,11 +123,32 @@ class SearchBox(SearchBoxViewlet, FacetMixin):
 
 class SearchView(Search):
 
+    def results(
+        self, query=None, batch=True, b_size=10, b_start=0, use_content_listing=True
+    ):
+        """Return search results, forcing Solr usage when active to ensure facet support."""
+        query = query or {}
+
+        self.request.form.setdefault("SearchableText", "")
+
+        # Force Solr to prevent fallback to Plone's default catalog
+        # (e.g., for empty searches and facet support)
+        if self.solr_active:
+            query["use_solr"] = True
+
+        return super().results(query, batch, b_size, b_start, use_content_listing)
+
     @property
     def solr_active(self):
         return isActive()
 
     def search_facets(self):
+        registry = getUtility(IRegistry)
+        facets = registry["collective.solr.facets"]
+        if facets and self.request.form.get("facet") != "false":
+            self.request.form.setdefault("facet", "true")
+            self.request.form.setdefault("facet.field", facets)
+
         view = api.content.get_view("search-facets", self.context, self.request)
         return view(results=self.results(batch=False, use_content_listing=False))
 
