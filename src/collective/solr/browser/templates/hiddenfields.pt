@@ -1,4 +1,5 @@
-<input type="hidden" name="facet" value="true" />
+<input type="hidden" name="facet" value="true"
+       tal:condition="options/facets"/>
 <input type="hidden" name="facet.field"
        tal:repeat="facet options/facets"
        tal:attributes="value facet" />

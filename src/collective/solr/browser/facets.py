@@ -143,24 +143,41 @@ class SearchView(Search):
         return isActive()
 
     def search_facets(self):
+        if not self.solr_active:
+            return None
+
         registry = getUtility(IRegistry)
         facets = registry["collective.solr.facets"]
         if facets and self.request.form.get("facet") != "false":
             self.request.form.setdefault("facet", "true")
             self.request.form.setdefault("facet.field", facets)
 
+        results = self.results(batch=False, use_content_listing=False)
+
         view = api.content.get_view("search-facets", self.context, self.request)
-        return view(results=self.results(batch=False, use_content_listing=False))
+        view(results=results)
+        return view
 
 
 class SearchFacetsView(BrowserView, FacetMixin):
     """view for displaying facetting info as provided by solr searches"""
 
+    results = None
+    facets = None
+    selected = None
+
     def __call__(self, results):
         self.results = results
+        self.facets = self.facets_info()
+        self.selected = self.selected_facets()
+
+    def render(self):
         return self.index()
 
-    def facets(self):
+    def has_facets(self):
+        return bool(self.facets)
+
+    def facets_info(self):
         """prepare and return facetting info for the given SolrResponse"""
         fcs = getattr(self.results, "facet_counts", None)
         if self.results is not None and fcs is not None:
@@ -169,7 +186,7 @@ class SearchFacetsView(BrowserView, FacetMixin):
         else:
             return None
 
-    def selected(self):
+    def selected_facets(self):
         """determine selected facets and prepare links to clear them;
         this assumes that facets are selected using filter queries"""
         info = []

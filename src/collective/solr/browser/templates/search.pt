@@ -91,11 +91,13 @@
 
 
           <div class="nav-item dropdown me-3" id="search-filter"
-               tal:condition="view/solr_active">
+               tal:define="facets_view python:view.search_facets();
+                           has_facets python:facets_view.has_facets()"
+               tal:condition="python: view.solr_active and has_facets">
             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" id="search-filter-toggle" i18n:translate="narrow_search_options">
               Filter the results
             </a>
-            <div  tal:replace="structure view/search_facets"/>
+            <div  tal:replace="structure facets_view/render"/>
           </div>
 
           <div class="nav-item dropdown me-3" id="search-filter"
